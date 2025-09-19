@@ -25,7 +25,7 @@ variable "instance_type" {
 variable "key_name" {
     description = "AWS key pair name"
     type        = string
-    default     = "Ec2.pem" # Replace with your key pair name
+    default     = "Ec2" # Replace with your key pair name
 }
 
 variable "environment" {
