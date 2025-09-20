@@ -1,0 +1,2 @@
+[webservers]
+13.217.143.148 ansible_user=ubuntu ansible_ssh_private_key_file=~/Downloads/Ec2.pem
