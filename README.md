@@ -22,3 +22,38 @@ This project emphasizes infrastructure-as-code (IaC), modularity, and automation
 ├── terraform/              # Terraform configurations and modules for AWS infrastructure
 └── .github/workflows/      # GitHub Actions workflows for CI/CD
 
+```
+## ✅ Verification  
+
+After deploying the stack, confirm everything is working by following these checks:  
+
+ 1. Check Nginx Reverse Proxy  
+```bash
+systemctl status nginx
+curl -I http://localhost
+curl -I http://<EC2_PUBLIC_IP>
+```
+✅ You should see an HTTP/1.1 200 OK response or the Node.js app page in the browser.
+
+2. Check Node.js App
+```curl http://localhost:3000
+pm2 status
+```
+✅ The app should return a response and appear as online in the pm2 process table.
+
+3. Check MongoDB
+```systemctl status mongod
+mongosh --eval "db.stats()"
+```
+✅ Service should be active (running) and output DB stats in JSON.
+
+4. Verify Logs
+```tail -f /var/log/nginx/access.log /var/log/nginx/error.log
+pm2 logs my-app
+```
+✅ Requests should appear in Nginx logs, and app logs update in real time.
+
+5. Verify Idempotency
+```ansible-playbook -i inventory playbook.yml
+```
+✅ Output should show ok=... changed=0 (no unnecessary re-runs).
