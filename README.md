@@ -23,6 +23,36 @@ This project emphasizes infrastructure-as-code (IaC), modularity, and automation
 └── .github/workflows/      # GitHub Actions workflows for CI/CD
 
 ```
+## 🏗️ Project Setup
+
+### Clone the repository
+```
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
+```
+
+### Initialize Terraform
+```cd terraform
+terraform init
+terraform apply
+```
+This provisions:
+- VPC, subnets, security groups
+- EC2 instance
+- Networking for Nginx reverse proxy
+- Configure Ansible
+
+### Update your inventory file with your EC2 details.
+
+### Run:
+```ansible-playbook -i inventory playbook.yml```
+
+This installs & configures:
+- Node.js via NVM
+- MongoDB
+- PM2 process manager
+- Nginx reverse proxy
+
 ## ✅ Verification  
 
 After deploying the stack, confirm everything is working by following these checks:  
