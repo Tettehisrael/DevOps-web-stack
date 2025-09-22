@@ -1,0 +1,31 @@
+# ansible/roles/mongodb/tasks/main.yml
+
+  # Add MongoDB apt key
+- name: Add MongoDB apt key
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-6.0.asc
+    state: present
+  become: yes
+
+  # Add MongoDB repository
+- name: Add MongoDB repository
+  apt_repository:
+    repo: deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse
+    state: present
+    update_cache: yes
+  become: yes
+
+    # Install MongoDB
+- name: Install MongoDB
+  apt:
+    name: mongodb-org
+    state: present
+  become: yes
+
+    # Start and enable MongoDB
+- name: Start and enable MongoDB service
+  service:
+    name: mongod
+    state: started
+    enabled: yes
+  become: yes

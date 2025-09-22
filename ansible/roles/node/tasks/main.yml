@@ -1,0 +1,66 @@
+  # Add NodeSource repository for Node.js 18
+- name: Add NodeSource repository for Node.js 18
+  shell: curl -sL https://deb.nodesource.com/setup_18.x | bash -
+  become: yes
+
+  # Install Node.js 18 and npm
+- name: Install Node.js and npm
+  apt:
+    name: nodejs  # Includes npm
+    state: present
+    update_cache: yes
+
+  # Ensure app directory exists (consolidated from two tasks)
+- name: Ensure app directory exists
+  file:
+    path: /home/ubuntu/app
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+  # Fix permissions for npm global directory
+- name: Fix npm global directory permissions
+  file:
+    path: /usr/local/lib/node_modules
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+  # Install pm2 globally
+- name: Install PM2 globally
+  npm:
+    name: pm2
+    global: yes
+    state: present
+  become: yes
+
+# Copy Node.js app with rsync, excluding node_modules
+- name: Copy Node.js app with rsync
+  synchronize:
+    src: ../app/
+    dest: /home/ubuntu/app/
+    archive: yes
+    owner: yes
+    group: yes
+    mode: push
+    rsync_opts:
+      - "--exclude=node_modules/"
+
+  # Install Node.js dependencies
+- name: Install Node.js dependencies
+  command: npm install
+  args:
+    chdir: /home/ubuntu/app
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/bin"
+
+  # Run Node.js app with pm2
+- name: Run Node.js app with pm2 (restart if running)
+  command: pm2 start server.js --name my-app -f
+  args:
+    chdir: /home/ubuntu/app
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/bin"
+  become_user: ubuntu

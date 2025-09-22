@@ -1,0 +1,28 @@
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Deploy Nginx reverse proxy config
+  template:
+    src: myapp.conf.j2
+    dest: /etc/nginx/sites-available/myapp.conf
+  notify: Restart Nginx
+  become: yes
+
+- name: Enable Nginx site
+  file:
+    src: /etc/nginx/sites-available/myapp.conf
+    dest: /etc/nginx/sites-enabled/myapp.conf
+    state: link
+  notify: Restart Nginx
+  become: yes
+
+- name: Remove default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Restart Nginx
+  become: yes

@@ -1,114 +1,21 @@
+# playbook.yml
+
 - hosts: webservers
   become: yes
   tasks:
-    # Install prerequisites (Python, rsync, Nginx, Node.js)
+    # Install base prerequisites (system utilities, nginx already pulled in role)
     - name: Install system packages
       apt:
         name:
           - python3
           - rsync
-          - nginx
         state: present
         update_cache: yes
         cache_valid_time: 3600
 
-    # Start and enable Nginx
-    - name: Start Nginx
-      service:
-        name: nginx
-        state: started
-        enabled: yes
-
-    # Add NodeSource repository for Node.js 18
-    - name: Add NodeSource repository for Node.js 18
-      shell: curl -sL https://deb.nodesource.com/setup_18.x | bash -
-      become: yes
-
-    # Install Node.js 18 and npm
-    - name: Install Node.js and npm
-      apt:
-        name: nodejs  # Includes npm
-        state: present
-        update_cache: yes
-
-    # Add MongoDB apt key
-    - name: Add MongoDB apt key
-      apt_key:
-        url: https://www.mongodb.org/static/pgp/server-6.0.asc
-        state: present
-
-    # Add MongoDB repository
-    - name: Add MongoDB repository
-      apt_repository:
-        repo: deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse
-        state: present
-        update_cache: yes
-
-    # Install MongoDB
-    - name: Install MongoDB
-      apt:
-        name: mongodb-org
-        state: present
-
-    # Start and enable MongoDB
-    - name: Start MongoDB
-      service:
-        name: mongod
-        state: started
-        enabled: yes
-
-    # Ensure app directory exists (consolidated from two tasks)
-    - name: Ensure app directory exists
-      file:
-        path: /home/ubuntu/app
-        state: directory
-        owner: ubuntu
-        group: ubuntu
-        mode: '0755'
-
-    # Fix permissions for npm global directory
-    - name: Fix npm global directory permissions
-      file:
-        path: /usr/local/lib/node_modules
-        state: directory
-        owner: ubuntu
-        group: ubuntu
-        mode: '0755'
-
-    # Install pm2 globally
-    - name: Install pm2
-      npm:
-        name: pm2
-        global: yes
-        state: present
-      environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/bin"
-
-    # Copy Node.js app with rsync, excluding node_modules
-    - name: Copy Node.js app with rsync
-      synchronize:
-        src: ../app/
-        dest: /home/ubuntu/app/
-        archive: yes
-        owner: yes
-        group: yes
-        mode: push
-        rsync_opts:
-          - "--exclude=node_modules/"
-
-    # Install Node.js dependencies
-    - name: Install Node.js dependencies
-      command: npm install
-      args:
-        chdir: /home/ubuntu/app
-      environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/bin"
-
-    # Run Node.js app with pm2
-    - name: Run Node.js app with pm2
-      command: pm2 start server.js --name my-app
-      args:
-        chdir: /home/ubuntu/app
-      environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/bin"
-      become_user: ubuntu
+- hosts: webservers
+  become: yes
+  roles:
+    - mongodb
+    - node
+    - nginx
